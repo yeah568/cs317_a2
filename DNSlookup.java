@@ -4,10 +4,6 @@ import java.net.InetAddress;
 import java.util.Random;
 
 /**
- *
- */
-
-/**
  * @author Donald Acton
  * This example is adapted from Kurose & Ross
  *
@@ -19,7 +15,10 @@ public class DNSlookup {
 	static InetAddress rootNameServer;
 
 	static final int MAX_QUERIES = 30;
-	static final int UDP_TIMEOUT = 5; // seconds
+	static final int UDP_TIMEOUT = 5 * 1000; // milliseconds
+
+    static DatagramSocket socket;
+    static Random rand;
 
 	/**
      * @param args
@@ -43,6 +42,15 @@ public class DNSlookup {
 				tracingOn = true;
 
 		// Start adding code here to initiate the lookup
+
+        // initialize socket
+        socket = new DatagramSocket();
+        socket.setSoTimeout(UDP_TIMEOUT);
+
+        // initialize random
+        rand = new Random();
+
+        
 
 	}
 
