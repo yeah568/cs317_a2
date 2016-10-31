@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.util.Random;
 
 /**
- * 
+ *
  */
 
 /**
@@ -14,32 +14,36 @@ import java.util.Random;
  */
 public class DNSlookup {
 
-
 	static final int MIN_PERMITTED_ARGUMENT_COUNT = 2;
 	static boolean tracingOn = false;
 	static InetAddress rootNameServer;
-	
+
+	static final int MAX_QUERIES = 30;
+	static final int UDP_TIMEOUT = 5; // seconds
+
 	/**
-	 * @param args
+     * @param args
 	 */
 	public static void main(String[] args) throws Exception {
 		String fqdn;
 		DNSResponse response; // Just to force compilation
 		int argCount = args.length;
-		
+
 		if (argCount < 2 || argCount > 3) {
 			usage();
 			return;
 		}
 
+		int minTTL = Integer.MAX_VALUE;
+
 		rootNameServer = InetAddress.getByName(args[0]);
 		fqdn = args[1];
-		
+
 		if (argCount == 3 && args[2].equals("-t"))
 				tracingOn = true;
-		
+
 		// Start adding code here to initiate the lookup
-		
+
 	}
 
 	private static void usage() {
