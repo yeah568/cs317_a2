@@ -25,7 +25,7 @@ public class DNSlookup {
 	 */
 	public static void main(String[] args) throws Exception {
 		String fqdn;
-		DNSResponse response; // Just to force compilation
+		DNSMessage response; // Just to force compilation
 		int argCount = args.length;
 
 		if (argCount < 2 || argCount > 3) {

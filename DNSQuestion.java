@@ -25,6 +25,10 @@ public class DNSQuestion {
         this.qclass = qclass;
     }
 
+    public DNSQuestion(byte[] data, DNSMessage message) {
+
+    }
+
     public byte[] getBuffer() {
         byte[] buf = new byte[qname.length + 2 + 2];
         System.arraycopy(this.qname, 0, buf, 0, this.qname.length);

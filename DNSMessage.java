@@ -1,5 +1,4 @@
 
-import java.net.InetAddress;
 import java.util.List;
 
 
@@ -42,14 +41,24 @@ public class DNSMessage {
         // parse header
         this.header = new DNSHeader(data, this);
 
-		for (int i = 0; i < this.header.getQuestionCount(); i++) {
-
-			
-		}
-
-
 	    // Extract list of answers, name server, and additional information response 
 	    // records
+
+        for (int i = 0; i < this.header.getQuestionCount(); i++) {
+            this.questions.add(new DNSQuestion(data, this));
+        }
+
+        for (int i = 0; i < this.header.getAnswerCount(); i++) {
+            this.answers.add(new RR(data, this));
+        }
+
+        for (int i = 0; i < this.header.getNsCount(); i++) {
+            this.authorities.add(new RR(data, this));
+        }
+
+        for (int i = 0; i < this.header.getAdditionalCount(); i++) {
+            this.additional.add(new RR(data, this));
+        }
 	}
 
 
