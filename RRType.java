@@ -19,7 +19,7 @@ public enum RRType {
 
 
     private final int RRTypeCode;
-    private RRType(int RRTypeCode) {
+    RRType(int RRTypeCode) {
         this.RRTypeCode = RRTypeCode;
     }
 
