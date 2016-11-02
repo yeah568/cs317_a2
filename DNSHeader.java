@@ -23,8 +23,8 @@ public class DNSHeader {
 
     }
 
-    public DNSHeader (byte[] data) {
-        int i = 0;
+    public DNSHeader (byte[] data, DNSMessage message) {
+        int i = message.getBufIndex();
 
         // The following are probably some of the things
         // you will need to do.
@@ -61,6 +61,7 @@ public class DNSHeader {
 
         this.additionalCount = (data[i++] << 8) | data[i++];
 
+        message.setBufIndex(i);
     }
 
     public byte[] getBuffer() {

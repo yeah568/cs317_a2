@@ -13,8 +13,13 @@ import java.util.List;
 
 
 public class DNSMessage {
+	private int bufIndex = 0;
+
     private DNSHeader header;
 	private List<DNSQuestion> questions;
+	private List<RR> answers;
+    private List<RR> authorities;
+    private List<RR> additional;
 
 
     private boolean decoded = false;        // Was this response successfully decoded
@@ -35,7 +40,7 @@ public class DNSMessage {
 	public DNSMessage (byte[] data, int len) {
 
         // parse header
-        this.header = new DNSHeader(data);
+        this.header = new DNSHeader(data, this);
 
 		for (int i = 0; i < this.header.getQuestionCount(); i++) {
 
@@ -55,7 +60,16 @@ public class DNSMessage {
     // You will also want methods to extract the response records and record
     // the important values they are returning. Note that an IPV6 reponse record
     // is of type 28. It probably wouldn't hurt to have a response record class to hold
-    // these records. 
+    // these records.
+
+	public int getBufIndex() {
+		return bufIndex;
+	}
+
+	public void setBufIndex(int bufIndex) {
+		this.bufIndex = bufIndex;
+	}
+
 }
 
 
