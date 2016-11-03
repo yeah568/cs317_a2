@@ -1,4 +1,7 @@
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RR {
     String name;
@@ -8,7 +11,10 @@ public class RR {
     int rdlength;
     RRData data;
 
-    public RR(byte[] data, DNSMessage message) {
+    RR(byte[] data, DNSMessage message) {
+
+        this.name = getName(data, message);
+
         int i = message.getBufIndex();
 
         this.type = RRType.fromInt((data[i++] << 8) | data[i++]);
@@ -35,7 +41,56 @@ public class RR {
         }
     }
 
+    public static String getName(byte[] data, DNSMessage message) {
+        int i = message.getBufIndex();
 
+        int len = data[i];
+        List<String> labels= new ArrayList<>();
+        if (((len >> 6) & 0b11) == 0b11) {
+            // pointer
+            // next 14 bits are offset, aka new index
+            i++;
+            int offset = ((len & 0b111111) << 2) | data[i++];
+            labels.add(getLabel(data, offset));
+        } else {
+            String label = getLabel(data, i);
+            labels.add(label);
+            i += label.length() + 1;
+        }
+
+        message.setBufIndex(i);
+
+        return String.join(".", labels);
+    }
+
+    private static String getLabel(byte[] data, int index) {
+        int len = data[index++];
+        List<String> labels= new ArrayList<>();
+
+        while (len != 0) {
+            if (((len >> 6) & 0b11) == 0b11) {
+                // pointer
+                // next 14 bits are offset, aka new index
+                int offset = ((len & 0b111111) << 8) | data[index++];
+                labels.add(getLabel(data, offset));
+                break;
+            } else {
+                byte[] chars = new byte[len];
+
+                for (int i = 0; i < len; i++) {
+                    chars[i] = data[index++];
+                }
+                labels.add(new String(chars));
+                len = data[index++];
+            }
+        }
+
+        return String.join(".", labels);
+    }
+
+/*    public byte[] getBuffer() {
+
+    }*/
 }
 
 class RRData {
@@ -48,13 +103,46 @@ class A_RRData extends RRData {
     InetAddress address;
     public A_RRData(byte[] data, DNSMessage message) {
         super();
+        int i = message.getBufIndex();
 
+        byte[] addr = new byte[4];
+        for (int j = 0; j < addr.length; j++) {
+            addr[j] = data[i++];
+        }
+
+        try {
+            address = InetAddress.getByAddress(addr);
+        } catch (UnknownHostException e) {
+            System.err.println("IP address parsing failed.");
+            e.printStackTrace();
+        }
+
+        message.setBufIndex(i);
     }
+
+
 }
 
 class AAAA_RRData extends RRData {
+    InetAddress address;
     public AAAA_RRData(byte[] data, DNSMessage message) {
         super();
+        int i = message.getBufIndex();
+
+        byte[] addr = new byte[16];
+        for (int j = 0; j < addr.length; j++) {
+            addr[j] = data[i++];
+        }
+
+        try {
+            address = InetAddress.getByAddress(addr);
+        } catch (UnknownHostException e) {
+            System.err.println("IP address parsing failed.");
+            e.printStackTrace();
+        }
+
+        message.setBufIndex(i);
+
     }
 }
 
@@ -65,7 +153,9 @@ class CNAME_RRData extends RRData {
 }
 
 class NS_RRData extends RRData {
+    String ns;
     public NS_RRData(byte[] data, DNSMessage message) {
         super();
+        this.ns = RR.getName(data, message);
     }
 }

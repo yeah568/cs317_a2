@@ -1,3 +1,5 @@
+import java.util.Random;
+
 public class DNSHeader {
     private int queryID;                    // this is for the response it must match the one in the request
 
@@ -20,6 +22,9 @@ public class DNSHeader {
 
 
     public DNSHeader() {
+        this.queryID = new Random().nextInt();
+
+        this.questionCount = 1; // only dealing with one query
 
     }
 

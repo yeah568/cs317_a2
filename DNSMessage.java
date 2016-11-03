@@ -1,4 +1,6 @@
 
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -36,13 +38,18 @@ public class DNSMessage {
     // The constructor: you may want to add additional parameters, but the two shown are 
     // probably the minimum that you need.
 
-	public DNSMessage (byte[] data, int len) {
+	public DNSMessage (byte[] data) {
 
         // parse header
         this.header = new DNSHeader(data, this);
 
 	    // Extract list of answers, name server, and additional information response 
 	    // records
+
+        this.questions = new ArrayList<>();
+        this.answers = new ArrayList<>();
+        this.authorities = new ArrayList<>();
+        this.additional = new ArrayList<>();
 
         for (int i = 0; i < this.header.getQuestionCount(); i++) {
             this.questions.add(new DNSQuestion(data, this));
@@ -60,6 +67,29 @@ public class DNSMessage {
             this.additional.add(new RR(data, this));
         }
 	}
+
+	public DNSMessage(String fqdn) {
+        this.header = new DNSHeader();
+        this.questions = new ArrayList<>();
+        this.questions.add(new DNSQuestion(fqdn));
+    }
+
+    public byte[] getBuffer() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        out.write(this.header.getBuffer(), 0, this.header.getBuffer().length);
+
+        for (DNSQuestion q : this.questions) {
+            out.write(q.getBuffer(), 0, q.getBuffer().length);
+        }
+/*
+        for (RR r : this.answers) {
+            out.write(r.getBuffer(), 0, r.getBuffer().length);
+        }*/
+
+        return out.toByteArray();
+
+    }
 
 
     // You will probably want a methods to extract a compressed FQDN, IP address
@@ -79,6 +109,45 @@ public class DNSMessage {
 		this.bufIndex = bufIndex;
 	}
 
+    public DNSHeader getHeader() {
+        return header;
+    }
+
+    public void setHeader(DNSHeader header) {
+        this.header = header;
+    }
+
+    public List<DNSQuestion> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<DNSQuestion> questions) {
+        this.questions = questions;
+    }
+
+    public List<RR> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<RR> answers) {
+        this.answers = answers;
+    }
+
+    public List<RR> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(List<RR> authorities) {
+        this.authorities = authorities;
+    }
+
+    public List<RR> getAdditional() {
+        return additional;
+    }
+
+    public void setAdditional(List<RR> additional) {
+        this.additional = additional;
+    }
 }
 
 

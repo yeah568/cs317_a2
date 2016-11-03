@@ -1,4 +1,5 @@
 
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Random;
@@ -18,7 +19,6 @@ public class DNSlookup {
 	static final int UDP_TIMEOUT = 5 * 1000; // milliseconds
 
     static DatagramSocket socket;
-    static Random rand;
 
 	/**
      * @param args
@@ -47,11 +47,21 @@ public class DNSlookup {
         socket = new DatagramSocket();
         socket.setSoTimeout(UDP_TIMEOUT);
 
-        // initialize random
-        rand = new Random();
+        DNSMessage msg = new DNSMessage(fqdn);
+		byte[] buf = msg.getBuffer();
 
-        
+		DatagramPacket packet = new DatagramPacket(buf, buf.length, rootNameServer, 53);
+		socket.send(packet);
 
+
+		// TODO: check  length
+		byte[] recvBuf = new byte[512];
+		DatagramPacket recv = new DatagramPacket(recvBuf, recvBuf.length);
+		socket.receive(recv);
+
+		DNSMessage recvMsg = new DNSMessage(recv.getData());
+
+		recvMsg.getBuffer();
 	}
 
 	private static void usage() {

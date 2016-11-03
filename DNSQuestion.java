@@ -6,11 +6,11 @@ public class DNSQuestion {
     public DNSQuestion(String qname) {
         // default to type 1, class 1
         // A records, Internet class
-        new DNSQuestion(qname, 1, 1);
+        this(qname, 1, 1);
     }
 
     public DNSQuestion(String qname, int qtype, int qclass) {
-        this.qname = new byte[qname.length()+1];
+        this.qname = new byte[qname.length()+2];
 
         int i = 0;
         for (String label : qname.split("\\.")) {
@@ -25,8 +25,30 @@ public class DNSQuestion {
         this.qclass = qclass;
     }
 
-    public DNSQuestion(byte[] data, DNSMessage message) {
 
+    // TODO: parse from bytestream
+    public DNSQuestion(byte[] data, DNSMessage message) {
+        int i = message.getBufIndex();
+
+        int totalLength = 0;
+
+        int len = data[i];
+        do {
+            totalLength += 1 + len;
+            len = data[i+totalLength];
+        } while (len != 0);
+
+        totalLength++;
+
+        this.qname = new byte[totalLength];
+        System.arraycopy(data, i, this.qname, 0, totalLength);
+
+        i += totalLength;
+
+        this.qtype = (data[i++] << 8) | data[i++];
+        this.qclass  = (data[i++] << 8) | data[i++];
+
+        message.setBufIndex(i);
     }
 
     public byte[] getBuffer() {
