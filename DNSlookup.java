@@ -61,12 +61,18 @@ public class DNSlookup {
 		try {
 			socket.receive(recv);
 		} catch (SocketTimeoutException e) {
-			System.out.println("timeout");
+			handleError(-2, msg);
 		}
 
 		DNSMessage recvMsg = new DNSMessage(recv.getData());
 
-		recvMsg.getBuffer();
+		recvMsg.dumpResponse();
+	}
+
+
+	private static void handleError(int code, DNSMessage message) {
+		System.out.println(String.format("%s %d 0.0.0.0", message.getQuestions().get(0).getName(), code));
+		System.exit(1);
 	}
 
 	private static void usage() {

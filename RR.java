@@ -127,7 +127,10 @@ class A_RRData extends RRData {
         message.setBufIndex(i);
     }
 
-
+    @Override
+    public String toString() {
+        return address.getHostAddress();
+    }
 }
 
 class AAAA_RRData extends RRData {
@@ -149,7 +152,11 @@ class AAAA_RRData extends RRData {
         }
 
         message.setBufIndex(i);
+    }
 
+    @Override
+    public String toString() {
+        return address.getHostAddress();
     }
 }
 
@@ -164,5 +171,10 @@ class NS_RRData extends RRData {
     public NS_RRData(byte[] data, DNSMessage message) {
         super();
         this.ns = RR.getName(data, message);
+    }
+
+    @Override
+    public String toString() {
+        return ns;
     }
 }

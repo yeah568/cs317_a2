@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class DNSQuestion {
     private byte[] qname;
     private int qtype = 0; // two bytes
@@ -25,8 +28,6 @@ public class DNSQuestion {
         this.qclass = qclass;
     }
 
-
-    // TODO: parse from bytestream
     public DNSQuestion(byte[] data, DNSMessage message) {
         int i = message.getBufIndex();
 
@@ -64,6 +65,24 @@ public class DNSQuestion {
         buf[i++] = (byte) (this.qclass & 0xf);
 
         return buf;
+    }
+
+    public String getName() {
+        int i = 0;
+        int len = this.qname[i++];
+        List<String> labels= new ArrayList<>();
+
+        while (len != 0) {
+            byte[] chars = new byte[len];
+
+            for (int j = 0; j < len; j++) {
+                chars[j] = this.qname[i++];
+            }
+            labels.add(new String(chars));
+            len = this.qname[i++];
+        }
+
+        return String.join(".", labels);
     }
 }
 

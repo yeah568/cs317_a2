@@ -22,7 +22,7 @@ public class DNSHeader {
 
 
     public DNSHeader() {
-        this.queryID = new Random().nextInt();
+        this.queryID = new Random().nextInt(65535);
 
         this.questionCount = 1; // only dealing with one query
 
