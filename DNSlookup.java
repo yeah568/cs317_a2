@@ -2,6 +2,7 @@
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.Random;
 
 /**
@@ -57,7 +58,11 @@ public class DNSlookup {
 		// TODO: check  length
 		byte[] recvBuf = new byte[512];
 		DatagramPacket recv = new DatagramPacket(recvBuf, recvBuf.length);
-		socket.receive(recv);
+		try {
+			socket.receive(recv);
+		} catch (SocketTimeoutException e) {
+			System.out.println("timeout");
+		}
 
 		DNSMessage recvMsg = new DNSMessage(recv.getData());
 

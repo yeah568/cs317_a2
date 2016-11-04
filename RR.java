@@ -44,18 +44,25 @@ public class RR {
     public static String getName(byte[] data, DNSMessage message) {
         int i = message.getBufIndex();
 
-        int len = data[i];
+        int len = data[i++];
         List<String> labels= new ArrayList<>();
-        if (((len >> 6) & 0b11) == 0b11) {
-            // pointer
-            // next 14 bits are offset, aka new index
-            i++;
-            int offset = ((len & 0b111111) << 2) | data[i++];
-            labels.add(getLabel(data, offset));
-        } else {
-            String label = getLabel(data, i);
-            labels.add(label);
-            i += label.length() + 1;
+
+        while (len != 0) {
+            if (((len >> 6) & 0b11) == 0b11) {
+                // pointer
+                // next 14 bits are offset, aka new index
+                int offset = ((len & 0b111111) << 8) | data[i++];
+                labels.add(getLabel(data, offset));
+                break;
+            } else {
+                byte[] chars = new byte[len];
+
+                for (int j = 0; j < len; j++) {
+                    chars[j] = data[i++];
+                }
+                labels.add(new String(chars));
+                len = data[i++];
+            }
         }
 
         message.setBufIndex(i);
