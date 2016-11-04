@@ -1,4 +1,5 @@
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -49,11 +50,7 @@ public class DNSlookup {
         socket.setSoTimeout(UDP_TIMEOUT);
 
         DNSMessage msg = new DNSMessage(fqdn);
-		byte[] buf = msg.getBuffer();
-
-		DatagramPacket packet = new DatagramPacket(buf, buf.length, rootNameServer, 53);
-		socket.send(packet);
-
+		sendMessage(msg, rootNameServer);
 
 		// TODO: check  length
 		byte[] recvBuf = new byte[512];
@@ -69,6 +66,23 @@ public class DNSlookup {
 		recvMsg.dumpResponse();
 	}
 
+	private static void sendMessage(DNSMessage message, InetAddress ns) {
+		System.out.println("\n\n");
+		System.out.println(String.format(
+				"Query ID     %s %s --> %s",
+				Integer.toUnsignedString(message.getHeader().getQueryID()),
+				message.getQuestions().get(0).getName(),
+				ns.getHostAddress()
+		));
+		byte[] buf = message.getBuffer();
+
+		DatagramPacket packet = new DatagramPacket(buf, buf.length, ns, 53);
+		try {
+			socket.send(packet);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private static void handleError(int code, DNSMessage message) {
 		System.out.println(String.format("%s %d 0.0.0.0", message.getQuestions().get(0).getName(), code));

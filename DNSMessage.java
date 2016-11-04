@@ -27,28 +27,6 @@ public class DNSMessage {
 
     // Note you will almost certainly need some additional instance variables.
 
-    // When in trace mode you probably want to dump out all the relevant information in a response
-
-	void dumpResponse() {
-        System.out.println(String.format("Response ID: %d Authoritative %s",
-                                            this.header.getQueryID(),
-                                            this.header.isAuthoritative() ? "true" : "false"));
-        System.out.println(String.format("  Answers (%d)", this.answers.size()));
-        for (RR r : this.answers) {
-            System.out.format("       %-30s %-10d %-4s %s\n", r.name, r.ttl, r.type.toString(), r.data.toString());
-        }
-
-        System.out.println(String.format("  Nameservers (%d)", this.authorities.size()));
-        for (RR r : this.authorities) {
-            System.out.format("       %-30s %-10d %-4s %s\n", r.name, r.ttl, r.type.toString(), r.data.toString());
-        }
-
-        System.out.println(String.format("  Additional Information (%d)", this.additional.size()));
-        for (RR r : this.additional) {
-            System.out.format("       %-30s %-10d %-4s %s\n", r.name, r.ttl, r.type.toString(), r.data.toString());
-        }
-	}
-
     // The constructor: you may want to add additional parameters, but the two shown are 
     // probably the minimum that you need.
 
@@ -114,6 +92,31 @@ public class DNSMessage {
     // the important values they are returning. Note that an IPV6 reponse record
     // is of type 28. It probably wouldn't hurt to have a response record class to hold
     // these records.
+
+
+    // When in trace mode you probably want to dump out all the relevant information in a response
+
+    void dumpResponse() {
+        System.out.println(String.format("Response ID: %s Authoritative %s",
+                Integer.toBinaryString(this.header.getQueryID()), // TODO: fix printing
+                this.header.isAuthoritative() ? "true" : "false"));
+        System.out.println(String.format("  Answers (%d)", this.answers.size()));
+        for (RR r : this.answers) {
+            System.out.format("       %-30s %-10d %-4s %s\n", r.name, r.ttl, r.type.toString(), r.data.toString());
+        }
+
+        System.out.println(String.format("  Nameservers (%d)", this.authorities.size()));
+        for (RR r : this.authorities) {
+            System.out.format("       %-30s %-10d %-4s %s\n", r.name, r.ttl, r.type.toString(), r.data.toString());
+        }
+
+        System.out.println(String.format("  Additional Information (%d)", this.additional.size()));
+        for (RR r : this.additional) {
+            System.out.format("       %-30s %-10d %-4s %s\n", r.name, r.ttl, r.type.toString(), r.data.toString());
+        }
+    }
+
+
 
 	public int getBufIndex() {
 		return bufIndex;
