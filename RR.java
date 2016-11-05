@@ -35,7 +35,7 @@ public class RR {
             case NS:
                 this.data = new NS_RRData(data, message);
                 break;
-            case CNAME:
+            case CN:
                 this.data = new CNAME_RRData(data, message);
                 break;
         }
@@ -161,8 +161,15 @@ class AAAA_RRData extends RRData {
 }
 
 class CNAME_RRData extends RRData {
+    String domain;
     public CNAME_RRData(byte[] data, DNSMessage message) {
         super();
+        this.domain = RR.getName(data, message);
+    }
+
+    @Override
+    public String toString() {
+        return domain;
     }
 }
 
