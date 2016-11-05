@@ -3,7 +3,7 @@ public enum RRType {
     NS     (2),  // an authoritative name server
     MD     (3),  // a mail destination (Obsolete - use MX)
     MF     (4),  // a mail forwarder (Obsolete - use MX)
-    CNAME  (5),  // the canonical name for an alias
+    CN     (5),  // the canonical name for an alias
     SOA    (6),  // marks the start of a zone of authority
     MB     (7),  // a mailbox domain name (EXPERIMENTAL)
     MG     (8),  // a mail group member (EXPERIMENTAL)
