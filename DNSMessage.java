@@ -98,7 +98,7 @@ public class DNSMessage {
 
     void dumpResponse() {
         System.out.println(String.format("Response ID: %s Authoritative %s",
-                Integer.toBinaryString(this.header.getQueryID()), // TODO: fix printing
+                Integer.toUnsignedString(this.header.getQueryID()),
                 this.header.isAuthoritative() ? "true" : "false"));
         System.out.println(String.format("  Answers (%d)", this.answers.size()));
         for (RR r : this.answers) {

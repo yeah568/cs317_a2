@@ -4,7 +4,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
-import java.util.Random;
 
 /**
  * @author Donald Acton
@@ -63,17 +62,22 @@ public class DNSlookup {
 
 		DNSMessage recvMsg = new DNSMessage(recv.getData());
 
-		recvMsg.dumpResponse();
+		if (tracingOn) {
+			recvMsg.dumpResponse();
+		}
 	}
 
 	private static void sendMessage(DNSMessage message, InetAddress ns) {
-		System.out.println("\n\n");
-		System.out.println(String.format(
-				"Query ID     %s %s --> %s",
-				Integer.toUnsignedString(message.getHeader().getQueryID()),
-				message.getQuestions().get(0).getName(),
-				ns.getHostAddress()
-		));
+		if (tracingOn) {
+			System.out.println("\n\n");
+			System.out.println(String.format(
+					"Query ID     %s %s --> %s",
+					Integer.toUnsignedString(message.getHeader().getQueryID()),
+					message.getQuestions().get(0).getName(),
+					ns.getHostAddress()
+			));
+		}
+
 		byte[] buf = message.getBuffer();
 
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, ns, 53);
