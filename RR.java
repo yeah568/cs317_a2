@@ -17,10 +17,10 @@ public class RR {
 
         int i = message.getBufIndex();
 
-        this.type = RRType.fromInt((data[i++] << 8) | data[i++]);
-        this.rclass = (data[i++] << 8) | data[i++];
-        this.ttl = (data[i++] << 24) | (data[i++] << 16) | (data[i++] << 8) | data[i++];
-        this.rdlength = (data[i++] << 8) | data[i++];
+        this.type = RRType.fromInt(((data[i++] << 8) & 0xff00) | (data[i++] & 0xff));
+        this.rclass = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
+        this.ttl = ((data[i++] << 24) & 0xff000000) | ((data[i++] << 16) & 0xff0000) | ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
+        this.rdlength = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
 
         message.setBufIndex(i);
 

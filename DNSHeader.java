@@ -22,7 +22,7 @@ public class DNSHeader {
 
 
     public DNSHeader() {
-        this.queryID = new Random().nextInt(65535);
+        this.queryID = new Random().nextInt(65535) & 0xffff;
 
         this.questionCount = 1; // only dealing with one query
 
@@ -35,12 +35,12 @@ public class DNSHeader {
         // you will need to do.
         // Extract the query ID
 
-        this.queryID = (data[i++] << 8) | data[i++];
+        this.queryID = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
 
         // Make sure the message is a query response and determine
         // if it is an authoritative response or note
 
-        int flags = (data[i++] << 8) | data[i++];
+        int flags = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
 
         this.response = ((flags >> 15) & 0x1) == 0x1;
         this.opcode = (flags >> 11) & 0b1111;
@@ -52,19 +52,19 @@ public class DNSHeader {
         this.nonAuthDataAcceptable = ((flags >> 4) & 0x1) == 0x1;
         this.replyCode = flags & 0b1111;
 
-        this.questionCount = (data[i++] << 8) | data[i++];
+        this.questionCount = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
 
         // determine answer count
 
-        this.answerCount = (data[i++] << 8) | data[i++];
+        this.answerCount = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
 
         // determine NS Count
 
-        this.nsCount = (data[i++] << 8) | data[i++];
+        this.nsCount = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
 
         // determine additional record count
 
-        this.additionalCount = (data[i++] << 8) | data[i++];
+        this.additionalCount = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
 
         message.setBufIndex(i);
     }

@@ -46,8 +46,8 @@ public class DNSQuestion {
 
         i += totalLength;
 
-        this.qtype = (data[i++] << 8) | data[i++];
-        this.qclass  = (data[i++] << 8) | data[i++];
+        this.qtype = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
+        this.qclass  = ((data[i++] << 8) & 0xff00) | (data[i++] & 0xff);
 
         message.setBufIndex(i);
     }
