@@ -58,10 +58,10 @@ public class DNSQuestion {
 
         int i = this.qname.length;
 
-        buf[i++] = (byte) ((this.qtype >> 4) & 0xf);
+        buf[i++] = (byte) ((this.qtype >> 8) & 0xf);
         buf[i++] = (byte) (this.qtype & 0xf);
 
-        buf[i++] = (byte) ((this.qclass >> 4) & 0xf);
+        buf[i++] = (byte) ((this.qclass >> 8) & 0xf);
         buf[i++] = (byte) (this.qclass & 0xf);
 
         return buf;

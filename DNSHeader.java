@@ -73,7 +73,7 @@ public class DNSHeader {
         byte[] buf = new byte[12];
 
         int i = 0;
-        buf[i++] = (byte) ((queryID >> 4) & 0xff);
+        buf[i++] = (byte) ((queryID >> 8) & 0xff);
         buf[i++] = (byte) (queryID & 0xff);
 
         byte flag1 = 0;
@@ -105,16 +105,16 @@ public class DNSHeader {
         flag2 |= replyCode & 0xf;
         buf[i++] = flag2;
 
-        buf[i++] = (byte) ((questionCount >> 4) & 0xff);
+        buf[i++] = (byte) ((questionCount >> 8) & 0xff);
         buf[i++] = (byte) (questionCount & 0xff);
 
-        buf[i++] = (byte) ((answerCount >> 4) & 0xff);
+        buf[i++] = (byte) ((answerCount >> 8) & 0xff);
         buf[i++] = (byte) (answerCount & 0xff);
 
-        buf[i++] = (byte) ((nsCount >> 4) & 0xff);
+        buf[i++] = (byte) ((nsCount >> 8) & 0xff);
         buf[i++] = (byte) (nsCount & 0xff);
 
-        buf[i++] = (byte) ((additionalCount >> 4) & 0xff);
+        buf[i++] = (byte) ((additionalCount >> 8) & 0xff);
         buf[i++] = (byte) (additionalCount & 0xff);
 
         return buf;
