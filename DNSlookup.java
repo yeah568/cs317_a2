@@ -48,6 +48,8 @@ public class DNSlookup {
         socket = new DatagramSocket();
         socket.setSoTimeout(UDP_TIMEOUT);
 
+
+
         DNSMessage msg = new DNSMessage(fqdn);
 		sendMessage(msg, rootNameServer);
 
@@ -65,6 +67,27 @@ public class DNSlookup {
 		if (tracingOn) {
 			recvMsg.dumpResponse();
 		}
+
+		if (recvMsg.getHeader().getReplyCode() == 3) {
+			handleError(-1, msg);
+		} else if (recvMsg.getHeader().getReplyCode() != 0) {
+			handleError(-4, msg);
+		}
+
+		if (recvMsg.getAnswers().size() > 0) {
+			// one or more answers
+			switch (recvMsg.getAnswers().get(0).type) {
+				case A:
+					break;
+				case AAAA:
+					break;
+				case CN:
+					break;
+			}
+		}
+
+
+
 	}
 
 	private static void sendMessage(DNSMessage message, InetAddress ns) {
