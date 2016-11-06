@@ -29,4 +29,17 @@ public enum RRType {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case A:
+            case AAAA:
+            case CN:
+            case NS:
+                return this.name();
+            default:
+                return String.format("%d", this.RRTypeCode);
+        }
+    }
 }
