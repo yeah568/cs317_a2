@@ -1,9 +1,6 @@
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketTimeoutException;
+import java.net.*;
 
 /**
  * @author Donald Acton
@@ -14,7 +11,6 @@ public class DNSlookup {
 
 	static final int MIN_PERMITTED_ARGUMENT_COUNT = 2;
 	static boolean tracingOn = false;
-	static InetAddress rootNameServer;
 
 	static final int MAX_QUERIES = 30;
 	static final int UDP_TIMEOUT = 5 * 1000; // milliseconds
@@ -26,12 +22,22 @@ public class DNSlookup {
 	static int queryCount = 0;
 
 
+    static boolean isSecondAttempt = false;
+    static boolean continueQuerying = true;
+    static boolean isNSResolution = false;
+
+
+    static String fqdn;
+    static InetAddress rootNameServer;
+
+    static InetAddress currentNS;
+    static String currentHost;
+
+
 	/**
      * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		String fqdn;
-		DNSMessage response; // Just to force compilation
 		int argCount = args.length;
 
 		if (argCount < 2 || argCount > 3) {
@@ -55,14 +61,21 @@ public class DNSlookup {
 
 
 
-        DNSMessage msg = new DNSMessage(fqdn);
-		firstQuery = msg;
-		sendMessage(msg, rootNameServer);
-		receiveMessage();
+        currentHost = fqdn;
+        currentNS = rootNameServer;
+
+        do {
+            DNSMessage msg = new DNSMessage(currentHost);
+
+            sendMessage(msg, currentNS);
+            receiveMessage();
+        } while (continueQuerying);
 	}
 
-	private static void sendMessage(DNSMessage message, InetAddress ns) throws IOException {
-		if (query)
+	private static void sendMessage(DNSMessage message, InetAddress ns) {
+		if (queryCount >= 30) {
+            handleError(-3);
+        }
 
 		if (tracingOn) {
 			System.out.println(String.format(
@@ -76,25 +89,43 @@ public class DNSlookup {
 		byte[] buf = message.getBuffer();
 
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, ns, 53);
-		socket.send(packet);
-	}
+        try {
+            socket.send(packet);
+        } catch (IOException e) {
+            // TODO: handle
+            e.printStackTrace();
+        }
+    }
 
-	private static void receiveMessage() throws IOException {
+	private static void receiveMessage() {
 		byte[] recvBuf = new byte[512];
 		DatagramPacket recv = new DatagramPacket(recvBuf, recvBuf.length);
 
-		socket.receive(recv);
 
-		DNSMessage recvMsg = new DNSMessage(recv.getData());
+        try {
+            socket.receive(recv);
+        } catch (IOException e) {
+            if (isSecondAttempt) {
+                handleError(-2);
+            }
+            isSecondAttempt = true;
+            continueQuerying = true;
+            return;
+        }
+        isSecondAttempt = false;
+
+        queryCount++;
+
+        DNSMessage recvMsg = new DNSMessage(recv.getData());
 
 		if (tracingOn) {
 			recvMsg.dumpResponse();
 		}
 
 		if (recvMsg.getHeader().getReplyCode() == 3) {
-			handleError(-1, firstQuery);
+			handleError(-1);
 		} else if (recvMsg.getHeader().getReplyCode() != 0) {
-			handleError(-4, firstQuery);
+			handleError(-4);
 		}
 
 		if (recvMsg.getAnswers().size() > 0) {
@@ -102,21 +133,42 @@ public class DNSlookup {
 			RR firstAnswer = recvMsg.getAnswers().get(0);
 			switch (firstAnswer.type) {
 				case A:
-					break;
 				case AAAA:
+				    if (isNSResolution) {
+                        // have IP for next NS, resume
+                        try {
+                            currentNS = InetAddress.getByName(firstAnswer.data.toString());
+                            isNSResolution = false;
+                        } catch (UnknownHostException e) {
+                            // TODO handle
+                            e.printStackTrace();
+                        }
+                        currentHost = fqdn;
+                    } else {
+                        // is final result
+                        continueQuerying = false;
+                        for (RR answer : recvMsg.getAnswers()) {
+                            System.out.println(String.format("%s %d %s", fqdn, answer.ttl, answer.data.toString()));
+                        }
+                    }
+
 					break;
 				case CN:
 					// CNAME, need to resolve
-					DNSMessage msg = new DNSMessage(firstAnswer.data.toString());
-					sendMessage(msg, rootNameServer);
-					receiveMessage();
-					break;
+					currentNS = rootNameServer;
+                    currentHost = firstAnswer.data.toString();
+                    return;
 			}
 		} else {
 			// no answers, need to go deeper
 			if (recvMsg.getAuthorities().size() > 0) {
-				// get next nameserver to check
-				String ns = recvMsg.getAuthorities().get(0).data.toString();
+                RR firstAuthority = recvMsg.getAuthorities().get(0);
+                if (firstAuthority.type != RRType.NS) {
+                    handleError(-4);
+                }
+
+                // get next nameserver to check
+				String ns = firstAuthority.data.toString();
 
 				// check if nameserver IP is given in additional info
 				if (recvMsg.getAdditional().size() > 0) {
@@ -124,37 +176,40 @@ public class DNSlookup {
 						if (additional.name.equalsIgnoreCase(ns) && additional.type == RRType.A) {
 							String nextNS = additional.data.toString();
 
-							DNSMessage msg = new DNSMessage(firstQuery.getQuestions().get(0).getName());
 							// NOTE: this does not do DNS resolution. If it's given an IP address string, it only
 							// converts it to an InetAddress.
-							sendMessage(msg, InetAddress.getByName(nextNS));
-							receiveMessage();
-							break;
+                            try {
+                                currentNS =  InetAddress.getByName(nextNS);
+                            } catch (UnknownHostException e) {
+                                // TODO: handle
+                            }
+                            return;
 						}
 					}
 				}
 
 				// IP address not given, resolve name server IP.
-
-
+                isNSResolution = true;
+                currentNS = rootNameServer;
+                currentHost = ns;
 			}
 		}
 	}
 
 
-	private DNSMessage resolveName(String host, InetAddress ns) {
+/*	private DNSMessage resolveName(String host, InetAddress ns) {
 		DNSMessage msg = new DNSMessage(host);
 		try {
 			sendMessage(msg, ns);
 		} catch (IOException e) {
-			handleError(-4, msg);
+			handleError(-4);
 		}
 
 
-	}
+	}*/
 
-	private static void handleError(int code, DNSMessage message) {
-		System.out.println(String.format("%s %d 0.0.0.0", message.getQuestions().get(0).getName(), code));
+	private static void handleError(int code) {
+		System.out.println(String.format("%s %d 0.0.0.0", fqdn, code));
 		System.exit(1);
 	}
 

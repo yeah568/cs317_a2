@@ -38,6 +38,9 @@ public class RR {
             case CN:
                 this.data = new CNAME_RRData(data, message);
                 break;
+            default:
+                this.data = new RRData();
+                break;
         }
     }
 
@@ -51,7 +54,7 @@ public class RR {
             if (((len >> 6) & 0b11) == 0b11) {
                 // pointer
                 // next 14 bits are offset, aka new index
-                int offset = ((len & 0b111111) << 8) | data[i++];
+                int offset = ((len << 8) & 0x3f00) | (data[i++] & 0xff);
                 labels.add(getLabel(data, offset));
                 break;
             } else {
@@ -103,6 +106,10 @@ public class RR {
 class RRData {
     public RRData() {
 
+    }
+
+    public String toString() {
+        return "----";
     }
 }
 
