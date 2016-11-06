@@ -47,7 +47,6 @@ public class DNSlookup {
 			return;
 		}
 
-
 		rootNameServer = InetAddress.getByName(args[0]);
 		fqdn = args[1];
 
@@ -59,8 +58,6 @@ public class DNSlookup {
         // initialize socket
         socket = new DatagramSocket();
         socket.setSoTimeout(UDP_TIMEOUT);
-
-
 
         currentHost = fqdn;
         currentNS = rootNameServer;
@@ -195,18 +192,6 @@ public class DNSlookup {
 			}
 		}
 	}
-
-
-/*	private DNSMessage resolveName(String host, InetAddress ns) {
-		DNSMessage msg = new DNSMessage(host);
-		try {
-			sendMessage(msg, ns);
-		} catch (IOException e) {
-			handleError(-4);
-		}
-
-
-	}*/
 
 	private static void handleError(int code) {
 		System.out.println(String.format("%s %d 0.0.0.0", fqdn, code));
