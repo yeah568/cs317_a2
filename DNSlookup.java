@@ -151,7 +151,7 @@ public class DNSlookup {
                         }
                     }
 
-					break;
+					return;
 				case CN:
 					// CNAME, need to resolve
                     minTTL = Math.min(minTTL, firstAnswer.ttl);
