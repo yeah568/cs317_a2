@@ -26,6 +26,8 @@ public class DNSlookup {
     static boolean continueQuerying = true;
     static boolean isNSResolution = false;
 
+    static int minTTL = Integer.MAX_VALUE;
+
 
     static String fqdn;
     static InetAddress rootNameServer;
@@ -45,7 +47,6 @@ public class DNSlookup {
 			return;
 		}
 
-		int minTTL = Integer.MAX_VALUE;
 
 		rootNameServer = InetAddress.getByName(args[0]);
 		fqdn = args[1];
@@ -148,13 +149,14 @@ public class DNSlookup {
                         // is final result
                         continueQuerying = false;
                         for (RR answer : recvMsg.getAnswers()) {
-                            System.out.println(String.format("%s %d %s", fqdn, answer.ttl, answer.data.toString()));
+                            System.out.println(String.format("%s %d %s", fqdn, Math.min(minTTL, answer.ttl), answer.data.toString()));
                         }
                     }
 
 					break;
 				case CN:
 					// CNAME, need to resolve
+                    minTTL = Math.min(minTTL, firstAnswer.ttl);
 					currentNS = rootNameServer;
                     currentHost = firstAnswer.data.toString();
                     return;
