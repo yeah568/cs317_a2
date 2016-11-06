@@ -40,6 +40,7 @@ public class RR {
                 break;
             default:
                 this.data = new RRData();
+                message.setBufIndex(i+rdlength);
                 break;
         }
     }
