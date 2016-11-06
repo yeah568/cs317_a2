@@ -93,8 +93,7 @@ public class DNSlookup {
         try {
             socket.send(packet);
         } catch (IOException e) {
-            // TODO: handle
-            e.printStackTrace();
+            handleError(-4);
         }
     }
 
@@ -141,8 +140,7 @@ public class DNSlookup {
                             currentNS = InetAddress.getByName(firstAnswer.data.toString());
                             isNSResolution = false;
                         } catch (UnknownHostException e) {
-                            // TODO handle
-                            e.printStackTrace();
+                            handleError(-4);
                         }
                         currentHost = fqdn;
                     } else {
@@ -183,7 +181,7 @@ public class DNSlookup {
                             try {
                                 currentNS =  InetAddress.getByName(nextNS);
                             } catch (UnknownHostException e) {
-                                // TODO: handle
+                                handleError(-4);
                             }
                             return;
 						}
